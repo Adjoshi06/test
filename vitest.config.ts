@@ -7,7 +7,12 @@ export default defineConfig({
   esbuild: { jsx: 'automatic' },
   test: {
     environment: 'node',
-    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx', 'src/**/*.test.ts', 'eval/**/*.test.ts'],
+    include: [
+      'tests/**/*.test.ts',
+      'tests/**/*.test.tsx',
+      'src/**/*.test.{ts,tsx}',
+      'eval/**/*.test.ts',
+    ],
   },
   resolve: {
     alias: {

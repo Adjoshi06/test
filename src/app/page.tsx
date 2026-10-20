@@ -19,8 +19,8 @@ export default function HomePage() {
         demo).
       </p>
       <p className="shell-status">
-        Library, product pages, firm sign-in, and the answering loop are in this release. The
-        seeded library is synthetic.
+        Library, product pages, firm sign-in, and the answering loop are in this release. The seeded
+        library is synthetic.
       </p>
     </main>
   );

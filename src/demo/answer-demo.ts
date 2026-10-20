@@ -330,3 +330,20 @@ export const DEMO_QUESTIONS = {
   clarify: CLARIFY_QUESTION,
   refusal: REFUSAL_QUESTION,
 } as const;
+
+/**
+ * All three demo outcomes through the real checker — the fixtures the answer-UI
+ * component tests assert against, so tests see exactly what checker output
+ * renders. Async: the scripted reasoner's answer() is async.
+ */
+export async function buildDemoFixtures(): Promise<{
+  answer: CheckedAnswer;
+  clarify: CheckedAnswer;
+  refusal: CheckedAnswer;
+}> {
+  return {
+    answer: await runDemoLoop(DEMO_QUESTIONS.answer),
+    clarify: await runDemoLoop(DEMO_QUESTIONS.clarify),
+    refusal: await runDemoLoop(DEMO_QUESTIONS.refusal),
+  };
+}
