@@ -1,6 +1,8 @@
-import { asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 import type { LibraryDb } from '@/db/client';
 import { methodEdges, methods } from '@/db/schema';
+import { decideComparability, orderedMethods } from './comparability';
+import type { ComparabilityDecision } from './comparability';
 import { RegistryIntegrityError, RegistryNotFoundError } from './errors';
 import { REGISTRY_SEED } from './seed-data';
 import type { MethodEdgeRow, MethodRow, NewMethod, NewMethodEdge } from './types';
@@ -181,7 +183,7 @@ export class RegistryService {
     if (!from || !to) {
       throw new RegistryIntegrityError('a comparability edge needs two method ids');
     }
-    const [canonicalFrom, canonicalTo] = orderedPair(from, to);
+    const [canonicalFrom, canonicalTo] = orderedMethods(from, to);
     if (canonicalFrom === canonicalTo) {
       throw new RegistryIntegrityError(
         'a method needs no edge to itself — same-method comparison is trivially comparable'
@@ -229,6 +231,45 @@ export class RegistryService {
   }
 
   /**
+   * The comparison the assertion checker calls. Registered pairs always
+   * answer — comparable, or not-comparable with the reason the account
+   * records. Unregistered ids throw: comparing against a method the account
+   * does not know is an integrity gap to surface, never an outcome.
+   */
+  async compareMethods(aId: string, bId: string): Promise<ComparabilityDecision> {
+    const a = aId.trim();
+    const b = bId.trim();
+    if (!a || !b) {
+      throw new RegistryIntegrityError('comparing methods requires two method ids');
+    }
+    const known = await this.db
+      .select({ id: methods.id })
+      .from(methods)
+      .where(inArray(methods.id, [a, b]));
+    const knownIds = new Set(known.map((row) => row.id));
+    for (const id of [a, b]) {
+      if (!knownIds.has(id)) {
+        throw new RegistryNotFoundError(id);
+      }
+    }
+    const [from, to] = orderedMethods(a, b);
+    const edgeRows =
+      from === to
+        ? [] // same method — the pure rule answers without an edge lookup
+        : await this.db
+            .select()
+            .from(methodEdges)
+            .where(and(eq(methodEdges.fromMethodId, from), eq(methodEdges.toMethodId, to)))
+            .limit(1);
+    const edge = edgeRows[0];
+    return decideComparability(
+      a,
+      b,
+      edge === undefined ? null : { comparable: edge.comparable, note: edge.note }
+    );
+  }
+
+  /**
    * Load the seeded account. Idempotent — re-running leaves the registry
    * unchanged, so tests and later fixture loaders can call it freely.
    */
@@ -236,13 +277,4 @@ export class RegistryService {
     await this.db.insert(methods).values(REGISTRY_SEED.methods).onConflictDoNothing();
     await this.db.insert(methodEdges).values(REGISTRY_SEED.edges).onConflictDoNothing();
   }
-}
-
-/**
- * Canonical direction of an unordered pair. Ids are lowercase ASCII slugs
- * (enforced by the schema), so JS string order and SQL text order agree —
- * the engine CHECK `from < to` accepts exactly the direction chosen here.
- */
-function orderedPair(aId: string, bId: string): [string, string] {
-  return aId < bId ? [aId, bId] : [bId, aId];
 }
