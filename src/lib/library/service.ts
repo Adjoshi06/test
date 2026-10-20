@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { LibraryDb } from '@/db/client';
 import { documents, extractedValues, passages } from '@/db/schema';
 import { LibraryAccessError, LibraryIntegrityError, LibraryNotFoundError } from './errors';
@@ -227,5 +227,77 @@ export class LibraryService {
         })
         .returning()
     );
+  }
+
+  /**
+   * The viewer's documents. An unauthenticated caller gets nothing — an empty
+   * list, never another owner's material.
+   */
+  async listDocuments(): Promise<DocumentRow[]> {
+    if (this.viewer === null) {
+      return [];
+    }
+    return this.db
+      .select()
+      .from(documents)
+      .where(eq(documents.ownerId, this.viewer.userId))
+      .orderBy(documents.createdAt);
+  }
+
+  /** The viewer's recorded values, oldest first. Unauthenticated: nothing. */
+  async listValues(): Promise<ValueRow[]> {
+    if (this.viewer === null) {
+      return [];
+    }
+    return this.db
+      .select()
+      .from(extractedValues)
+      .where(eq(extractedValues.ownerId, this.viewer.userId))
+      .orderBy(extractedValues.createdAt);
+  }
+
+  /**
+   * A document together with its evidence — every passage and every value,
+   * each still carrying its locator, method, authority, and verification
+   * state. Missing and foreign documents are indistinguishable: both return
+   * null, so invisibility never leaks existence.
+   */
+  async getDocument(
+    documentId: string
+  ): Promise<{ document: DocumentRow; passages: PassageRow[]; values: ValueRow[] } | null> {
+    if (this.viewer === null) {
+      return null;
+    }
+    const documentRows = await this.db
+      .select()
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.ownerId, this.viewer.userId)))
+      .limit(1);
+    const document = documentRows[0];
+    if (document === undefined) {
+      return null;
+    }
+    const documentPassages = await this.db
+      .select()
+      .from(passages)
+      .where(and(eq(passages.documentId, documentId), eq(passages.ownerId, this.viewer.userId)))
+      .orderBy(passages.createdAt);
+    let documentValues: ValueRow[] = [];
+    if (documentPassages.length > 0) {
+      documentValues = await this.db
+        .select()
+        .from(extractedValues)
+        .where(
+          and(
+            eq(extractedValues.ownerId, this.viewer.userId),
+            inArray(
+              extractedValues.passageId,
+              documentPassages.map((passage) => passage.id)
+            )
+          )
+        )
+        .orderBy(extractedValues.createdAt);
+    }
+    return { document, passages: documentPassages, values: documentValues };
   }
 }
