@@ -1,0 +1,91 @@
+:root {
+  color-scheme: light dark;
+  --ink: #1a1d21;
+  --paper: #faf9f7;
+  --muted: #6b6f76;
+  --accent: #9a5b3c;
+  --border: #e4e1dc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8e6e3;
+    --paper: #17181a;
+    --muted: #a0a4ab;
+    --accent: #c98a67;
+    --border: #2c2e32;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+.shell {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 6rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shell-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.shell h1 {
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
+.shell-lede {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.shell-notes {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+
+.shell-notes li {
+  padding-left: 1.25rem;
+  position: relative;
+  line-height: 1.5;
+}
+
+.shell-notes li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.shell-status {
+  font-size: 0.85rem;
+  color: var(--muted);
+}

@@ -1,0 +1,13 @@
+{
+  "cases": [
+    {
+      "id": "tc-1-discovery-task-chairs",
+      "title": "Discovery — task chairs",
+      "kind": "discovery",
+      "question": "show me task chairs",
+      "expected": {
+        "candidateIds": ["halden-task-chair"]
+      }
+    }
+  ]
+}

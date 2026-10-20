@@ -1,0 +1,5 @@
+node_modules/
+.next/
+.eval/
+*.tsbuildinfo
+.DS_Store

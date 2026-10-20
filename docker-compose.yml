@@ -1,0 +1,22 @@
+# Dev services only. The app shell does not touch Postgres yet; later PRs wire the
+# synthetic library to this instance (Postgres 16 + pgvector per the spec stack).
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: assistant-db
+    environment:
+      POSTGRES_USER: assistant
+      POSTGRES_PASSWORD: assistant
+      POSTGRES_DB: assistant
+    ports:
+      - '5432:5432'
+    volumes:
+      - assistant-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U assistant -d assistant']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  assistant-db-data:
