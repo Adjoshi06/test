@@ -64,6 +64,26 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Sign-in sessions. The browser holds the opaque token; the database holds
+ * only its SHA-256 hash — a leaked database cannot mint sessions, and expiry
+ * is enforced at resolution, not trusted from the client.
+ */
+export const sessions = pgTable(
+  'sessions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    /** SHA-256 of the opaque session token — never the token itself. */
+    tokenHash: text('token_hash').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check('sessions_token_hash_nonempty', sql`length(trim(${t.tokenHash})) > 0`)]
+);
+
 /** Manufacturer literature, code excerpts, briefs, correspondence. */
 export const documents = pgTable(
   'documents',
