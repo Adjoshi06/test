@@ -1,0 +1,661 @@
+{
+  "id": "936b2e99-7b05-43a0-99d9-63db3c360ddc",
+  "prevId": "1c922efa-339e-48b3-b255-97422f01a77f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.documents": {
+      "name": "documents",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "document_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jurisdiction": {
+          "name": "jurisdiction",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "edition": {
+          "name": "edition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "documents_owner_id_users_id_fk": {
+          "name": "documents_owner_id_users_id_fk",
+          "tableFrom": "documents",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "documents_id_owner_key": {
+          "name": "documents_id_owner_key",
+          "nullsNotDistinct": false,
+          "columns": ["id", "owner_id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "documents_title_nonempty": {
+          "name": "documents_title_nonempty",
+          "value": "length(trim(\"documents\".\"title\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.extracted_values": {
+      "name": "extracted_values",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "passage_id": {
+          "name": "passage_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw": {
+          "name": "raw",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "method_id": {
+          "name": "method_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "authority": {
+          "name": "authority",
+          "type": "authority",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "verification": {
+          "name": "verification",
+          "type": "verification_state",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "verified_by": {
+          "name": "verified_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "extracted_values_passage_owner_fkey": {
+          "name": "extracted_values_passage_owner_fkey",
+          "tableFrom": "extracted_values",
+          "tableTo": "passages",
+          "columnsFrom": ["passage_id", "owner_id"],
+          "columnsTo": ["id", "owner_id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "extracted_values_product_owner_fkey": {
+          "name": "extracted_values_product_owner_fkey",
+          "tableFrom": "extracted_values",
+          "tableTo": "products",
+          "columnsFrom": ["product_id", "owner_id"],
+          "columnsTo": ["id", "owner_id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "extracted_values_verified_by_fkey": {
+          "name": "extracted_values_verified_by_fkey",
+          "tableFrom": "extracted_values",
+          "tableTo": "users",
+          "columnsFrom": ["verified_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "extracted_values_property_nonempty": {
+          "name": "extracted_values_property_nonempty",
+          "value": "length(trim(\"extracted_values\".\"property_id\")) > 0"
+        },
+        "extracted_values_raw_nonempty": {
+          "name": "extracted_values_raw_nonempty",
+          "value": "length(trim(\"extracted_values\".\"raw\")) > 0"
+        },
+        "extracted_values_method_nonempty": {
+          "name": "extracted_values_method_nonempty",
+          "value": "length(trim(\"extracted_values\".\"method_id\")) > 0"
+        },
+        "extracted_values_verifier_matches_state": {
+          "name": "extracted_values_verifier_matches_state",
+          "value": "(\"extracted_values\".\"verification\" = 'human-verified') = (\"extracted_values\".\"verified_by\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.method_edges": {
+      "name": "method_edges",
+      "schema": "",
+      "columns": {
+        "from_method_id": {
+          "name": "from_method_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to_method_id": {
+          "name": "to_method_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "comparable": {
+          "name": "comparable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "method_edges_from_method_id_methods_id_fk": {
+          "name": "method_edges_from_method_id_methods_id_fk",
+          "tableFrom": "method_edges",
+          "tableTo": "methods",
+          "columnsFrom": ["from_method_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "method_edges_to_method_id_methods_id_fk": {
+          "name": "method_edges_to_method_id_methods_id_fk",
+          "tableFrom": "method_edges",
+          "tableTo": "methods",
+          "columnsFrom": ["to_method_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "method_edges_from_method_id_to_method_id_pk": {
+          "name": "method_edges_from_method_id_to_method_id_pk",
+          "columns": ["from_method_id", "to_method_id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "method_edges_canonical_direction": {
+          "name": "method_edges_canonical_direction",
+          "value": "\"method_edges\".\"from_method_id\" < \"method_edges\".\"to_method_id\""
+        },
+        "method_edges_note_nonempty": {
+          "name": "method_edges_note_nonempty",
+          "value": "length(trim(\"method_edges\".\"note\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.methods": {
+      "name": "methods",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "method_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "edition": {
+          "name": "edition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "methods_id_lowercase": {
+          "name": "methods_id_lowercase",
+          "value": "\"methods\".\"id\" = lower(\"methods\".\"id\")"
+        },
+        "methods_name_nonempty": {
+          "name": "methods_name_nonempty",
+          "value": "length(trim(\"methods\".\"name\")) > 0"
+        },
+        "methods_quantity_nonempty": {
+          "name": "methods_quantity_nonempty",
+          "value": "length(trim(\"methods\".\"quantity\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.passages": {
+      "name": "passages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "locator": {
+          "name": "locator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quote": {
+          "name": "quote",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "passages_document_owner_fkey": {
+          "name": "passages_document_owner_fkey",
+          "tableFrom": "passages",
+          "tableTo": "documents",
+          "columnsFrom": ["document_id", "owner_id"],
+          "columnsTo": ["id", "owner_id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "passages_id_owner_key": {
+          "name": "passages_id_owner_key",
+          "nullsNotDistinct": false,
+          "columns": ["id", "owner_id"]
+        },
+        "passages_document_locator_key": {
+          "name": "passages_document_locator_key",
+          "nullsNotDistinct": false,
+          "columns": ["document_id", "locator"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "passages_locator_nonempty": {
+          "name": "passages_locator_nonempty",
+          "value": "length(trim(\"passages\".\"locator\")) > 0"
+        },
+        "passages_quote_nonempty": {
+          "name": "passages_quote_nonempty",
+          "value": "length(trim(\"passages\".\"quote\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.products": {
+      "name": "products",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "products_owner_id_users_id_fk": {
+          "name": "products_owner_id_users_id_fk",
+          "tableFrom": "products",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "products_id_owner_key": {
+          "name": "products_id_owner_key",
+          "nullsNotDistinct": false,
+          "columns": ["id", "owner_id"]
+        },
+        "products_owner_slug_key": {
+          "name": "products_owner_slug_key",
+          "nullsNotDistinct": false,
+          "columns": ["owner_id", "slug"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "products_slug_nonempty": {
+          "name": "products_slug_nonempty",
+          "value": "length(trim(\"products\".\"slug\")) > 0"
+        },
+        "products_name_nonempty": {
+          "name": "products_name_nonempty",
+          "value": "length(trim(\"products\".\"name\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sessions_token_hash_unique": {
+          "name": "sessions_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": ["token_hash"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "sessions_token_hash_nonempty": {
+          "name": "sessions_token_hash_nonempty",
+          "value": "length(trim(\"sessions\".\"token_hash\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": ["email"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.authority": {
+      "name": "authority",
+      "schema": "public",
+      "values": ["product-doc", "code", "project", "correspondence"]
+    },
+    "public.document_kind": {
+      "name": "document_kind",
+      "schema": "public",
+      "values": ["product-doc", "code", "project", "correspondence"]
+    },
+    "public.method_kind": {
+      "name": "method_kind",
+      "schema": "public",
+      "values": ["measurement", "classification"]
+    },
+    "public.verification_state": {
+      "name": "verification_state",
+      "schema": "public",
+      "values": ["human-verified", "interpreted", "machine-read"]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

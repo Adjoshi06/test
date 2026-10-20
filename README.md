@@ -31,6 +31,30 @@ npm run dev               # http://localhost:3000
 | `npm run db:generate`  | Emit a migration from the schema |
 | `npm run db:migrate`   | Apply migrations locally         |
 
+## Sign-in and visibility
+
+Identity is resolved before anything reaches the model. `src/lib/auth/` owns it:
+
+- **`IdentityProvider`** (`provider.ts`) — the swappable sign-in contract. This release
+  ships `SeededEmailProvider` (email against the seeded firm roster); Google OAuth lands
+  behind the same interface in the connectors phase.
+- **`SessionService`** (`session.ts`) — opaque random session tokens (30-day expiry). Only
+  the token's SHA-256 hash is stored, so a leaked database cannot mint sessions; expired
+  sessions are deleted at resolution.
+- **`AuthService`** (`service.ts`) — `signIn` (returns the token once), `viewerFromToken`
+  (a null viewer means unauthenticated), and idempotent `signOut`.
+
+Seeding: `npm run db:seed` upserts the synthetic default roster (`.test` addresses), or
+`FIRM_USER_EMAILS=a@firm.test,b@firm.test npm run db:seed` for specific addresses.
+Idempotency is by normalized email — the user id survives re-seeding, so library rows that
+reference it do too.
+
+The visibility rule is enforced at the query layer, not the UI: every library query filters
+by the viewer's owner id, and an unauthenticated request (null viewer) gets an empty result
+from every read and a rejection from every write. `ViewerScopedSearch`
+(`src/lib/reasoner/scoped-search.ts`) is the identity gate in front of the model's one tool —
+a null viewer returns nothing and the delegate search never runs.
+
 ## Database
 
 Drizzle owns the schema and migrations. Change `src/db/schema.ts`, run
