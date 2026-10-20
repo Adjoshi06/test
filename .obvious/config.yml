@@ -1,0 +1,7 @@
+# Obvious repo policy — defaults, auto-detected from GitHub repo settings.
+# GitHub reports: default_branch=main; all merge methods enabled (size 0 repo).
+
+defaultBranch: main
+
+# Squash is the conservative default when all merge methods are enabled.
+mergeMethod: squash
