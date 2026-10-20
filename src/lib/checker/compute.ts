@@ -109,21 +109,24 @@ function checkAgainstValue(
     comparability = gate.comparability;
   }
   const recorded = asRecorded(value);
-  const expect = `'${want}'${expected !== undefined ? ` under '${expected}'` : ''}`;
-  if (value.raw === want) {
+  const wanted = `'${want}'${expected !== undefined ? ` under '${expected}'` : ''}`;
+  // The verdict follows the requirement's kind: equality satisfies raw-equals
+  // and violates raw-not-equals — the raw never decides on its own.
+  const satisfies = equals ? value.raw === want : value.raw !== want;
+  if (satisfies) {
     return {
       verdict: 'meet',
       reason: equals
-        ? `recorded as ${recorded} — equal to ${expect}`
-        : `recorded as ${recorded} — not ${expect}, which is what the requirement asks`,
+        ? `recorded as ${recorded} — equal to ${wanted}`
+        : `recorded as ${recorded} — not ${wanted}, which is what the requirement asks`,
       comparability,
     };
   }
   return {
     verdict: 'fail',
     reason: equals
-      ? `recorded as ${recorded} — not equal to ${expect}`
-      : `recorded as ${recorded} — equal to ${expect}, which the requirement excludes`,
+      ? `recorded as ${recorded} — not equal to ${wanted}`
+      : `recorded as ${recorded} — equal to ${wanted}, which the requirement excludes`,
     comparability,
   };
 }
