@@ -1,9 +1,11 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   check,
   foreignKey,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -19,7 +21,9 @@ import {
  * - Verification state is a closed set; `human-verified` and a verifier id
  *   imply each other — neither can exist alone.
  * - Every row carries its visibility owner; a child row can only point at a
- *   parent row owned by the same user (composite foreign keys).
+ *   parent row owned by the same user (composite foreign keys). The methods
+ *   registry below is the deliberate exception — a shared account, not
+ *   per-user material.
  */
 
 /** Where a document's authority comes from — the four knowledge bodies. */
@@ -128,7 +132,7 @@ export const extractedValues = pgTable(
     propertyId: text('property_id').notNull(),
     /** Exactly as the source words it. */
     raw: text('raw').notNull(),
-    /** e.g. 'en-13501-1' | 'astm-e84'. The methods registry lands separately. */
+    /** A methods-registry id, e.g. 'en-13501-1:2018' | 'astm-e84' — the registry is the account of which ids exist. */
     methodId: text('method_id').notNull(),
     authority: authorityEnum('authority').notNull(),
     verification: verificationStateEnum('verification').notNull(),
@@ -157,5 +161,77 @@ export const extractedValues = pgTable(
       'extracted_values_verifier_matches_state',
       sql`(${t.verification} = 'human-verified') = (${t.verifiedBy} is not null)`
     ),
+  ]
+);
+
+/**
+ * The methods registry — the account of which measurement methods and
+ * classification systems exist, and which may be set side by side.
+ *
+ * Unlike the library tables above, the registry carries no visibility owner:
+ * methods and their comparability edges are the firm-wide vocabulary every
+ * user's values address, and the account must be one shared truth, not
+ * per-user. Comparability is decided only by an explicit edge — matching
+ * quantity or name never confers it.
+ */
+
+/** A method is either a measurement procedure or a classification system. */
+export const methodKindEnum = pgEnum('method_kind', ['measurement', 'classification']);
+
+/**
+ * One registered method or classification system. The id is the canonical
+ * lowercase slug a value cites as its `methodId`; edition-specific rows (the
+ * two EN 13501-1 editions) carry distinct ids so a value addresses an edition
+ * precisely.
+ */
+export const methods = pgTable(
+  'methods',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    kind: methodKindEnum('kind').notNull(),
+    /** The property dimension the method addresses, e.g. 'fire-performance'. Descriptive only — matching quantities never confer comparability. */
+    quantity: text('quantity').notNull(),
+    /** Edition year when the row is edition-specific, e.g. '2018'; null otherwise. */
+    edition: text('edition'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // Lowercase ids keep JS and SQL text ordering in agreement (the edge store
+    // relies on it) and keep the cited spelling canonical.
+    check('methods_id_lowercase', sql`${t.id} = lower(${t.id})`),
+    check('methods_name_nonempty', sql`length(trim(${t.name})) > 0`),
+    check('methods_quantity_nonempty', sql`length(trim(${t.quantity})) > 0`),
+  ]
+);
+
+/**
+ * An explicit comparability edge between two distinct methods. Comparability
+ * is symmetric, so one row per unordered pair, stored in canonical
+ * (lexicographic) direction; the service normalizes before insert and before
+ * lookup. `comparable = false` records a *known* incomparability (the
+ * Euroclasses vs the E84 classes); the absence of a row refuses too — nothing
+ * is comparable without an account.
+ */
+export const methodEdges = pgTable(
+  'method_edges',
+  {
+    fromMethodId: text('from_method_id')
+      .notNull()
+      .references(() => methods.id),
+    toMethodId: text('to_method_id')
+      .notNull()
+      .references(() => methods.id),
+    comparable: boolean('comparable').notNull(),
+    /** Why the edge holds — shown with the verdict, never inferred. */
+    note: text('note').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.fromMethodId, t.toMethodId] }),
+    // Canonical direction also refuses self-edges: a method never needs an
+    // edge to itself, and one pair cannot hold two contradictory rows.
+    check('method_edges_canonical_direction', sql`${t.fromMethodId} < ${t.toMethodId}`),
+    check('method_edges_note_nonempty', sql`length(trim(${t.note})) > 0`),
   ]
 );
