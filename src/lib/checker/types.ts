@@ -67,6 +67,8 @@ export interface RequirementResult {
   verdict: ComplianceVerdict;
   /** The computed why — cites the recorded raw and, when compared across methods, the registry's basis. */
   reason: string;
+  /** Present on unknown cells — what would resolve it: a document, an edge, or a retry. */
+  wouldResolve?: string;
   /** Every recorded value the verdict was computed from — one step from the evidence. */
   evidence: LibraryRecord[];
   /** Present when the comparison crossed methods and was gated through the registry. */
@@ -151,7 +153,9 @@ export interface CheckerComparisonPort {
  * surface, not a not-comparable verdict (registry/errors.ts).
  */
 export type ComparisonOutcome =
-  ComparabilityDecision | { kind: 'unregistered'; methodIds: [string, string] };
+  | ComparabilityDecision
+  | { kind: 'unregistered'; methodIds: [string, string] }
+  | { kind: 'registry-error' }; // the account could not be consulted — an outage, not a verdict
 
 /** Pure comparison lookup the assembler uses — built by the orchestrator over prefetched decisions. */
 export type Comparator = (aMethodId: string, bMethodId: string) => ComparisonOutcome;
