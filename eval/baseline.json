@@ -1,0 +1,56 @@
+{
+  "harnessVersion": 1,
+  "engine": "scripted-stub",
+  "perQuestion": {
+    "candidates": {
+      "passed": 1,
+      "failed": 0
+    },
+    "traceability": {
+      "passed": 1,
+      "failed": 0
+    },
+    "unknown-honesty": {
+      "passed": 1,
+      "failed": 0
+    },
+    "verification-honesty": {
+      "passed": 1,
+      "failed": 0
+    },
+    "clarify-not-guess": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "cases": [
+    {
+      "caseId": "tc-1-discovery-task-chairs",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: halden-task-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 1 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a discovery question should produce."
+        }
+      }
+    }
+  ],
+  "allPassed": true
+}

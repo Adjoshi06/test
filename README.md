@@ -29,6 +29,20 @@ npm run dev               # http://localhost:3000
 | `npm run test`         | Vitest unit tests                |
 | `npm run build`        | Production build                 |
 
+## Eval harness
+
+Cases live in `eval/cases/*.cases.json`, written in the office's own words. The scripted engine
+answers without provider calls (unscripted questions refuse instead of guessing); the
+deterministic grader scores five standing questions — candidates, traceability, unknown-honesty,
+verification-honesty, clarify-not-guess.
+
+- `npm run eval:run -- --out=eval/baseline.json` regenerates the baseline.
+- CI runs the harness and compares head against the committed `eval/baseline.json`; any standing
+  question that passed at base and fails at head fails CI.
+- Update the baseline only deliberately, in the commit that changes behavior — every change must
+  move at least one standing question.
+- All fixtures and the baseline are synthetic (locked decision in the spec).
+
 ## Conventions
 
 - Conventional commits, authored as `Obvious <obvious@obvious.ai>` with a

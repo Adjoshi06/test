@@ -10,7 +10,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval:run": "tsx eval/cli.ts run",
+    "eval:compare": "tsx eval/cli.ts compare",
+    "eval:ci": "npm run -s eval:run -- --out=.eval/head-results.json && npm run -s eval:compare -- eval/baseline.json .eval/head-results.json"
   },
   "dependencies": {
     "next": "^15.5.0",
