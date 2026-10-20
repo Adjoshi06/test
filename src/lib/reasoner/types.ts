@@ -91,6 +91,30 @@ export type RequirementSource =
   | { kind: 'code'; ref: string }
   | { kind: 'inference'; basis: string };
 
+/**
+ * The checkable reading of a requirement — proposed by the reasoner as part of
+ * its interpretation (marked as the assistant's, editable in the UI), and
+ * executed — never invented — by the assertion checker. A check is the
+ * requirement source's claim in machine-checkable form; it is not a value, and
+ * the model has no authority to make it one. Compliance is computed by
+ * comparing recorded values against this reading, or stays unknown.
+ *
+ * Verdict semantics, chosen so absence is never mistaken for satisfaction:
+ * - `present`: a recorded value for the property meets it; none stays unknown.
+ * - `absent`: any recorded value fails it; none stays unknown — absence of a
+ *   proposed claim is not evidence the property is absent, so `absent` is
+ *   never met on a missing claim.
+ * - `raw-equals` / `raw-not-equals`: compared verbatim against the recorded
+ *   raw; no recorded value stays unknown. `methodId` is the method the
+ *   expectation is stated in; comparing against a value recorded under another
+ *   method goes through the methods registry's comparability account.
+ */
+export type RequirementCheck =
+  | { kind: 'present' }
+  | { kind: 'absent' }
+  | { kind: 'raw-equals'; raw: string; methodId?: string }
+  | { kind: 'raw-not-equals'; raw: string; methodId?: string };
+
 /** Part 2 — a requirement with its source. Firm knowledge adds requirements; it never relaxes a code (the checker enforces this). */
 export interface ProposedRequirement {
   /** Canonical property id, e.g. 'flame-spread-class'. */
@@ -98,6 +122,8 @@ export interface ProposedRequirement {
   /** The requirement as the source states it. */
   statement: string;
   source: RequirementSource;
+  /** The proposed checkable reading, when the requirement has one. Optional: without it the checker computes unknown. */
+  check?: RequirementCheck;
 }
 
 /**
