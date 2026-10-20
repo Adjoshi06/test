@@ -7,11 +7,12 @@
 // sources cannot support an answer. This component owns the evidence drawer's
 // open state so every value in every part is one click from its record.
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CheckedAnswer } from '@/lib/checker/types';
 import { CandidateMatrix } from './CandidateMatrix';
 import { CommentaryPanel } from './CommentaryPanel';
 import { ConflictsPanel } from './ConflictsPanel';
+import { EvidenceRecordCard } from './EvidenceRecordCard';
 import { InterpretationPanel, type InterpretationEdit } from './InterpretationPanel';
 import { RequirementsPanel } from './RequirementsPanel';
 import { SourcesPanel } from './SourcesPanel';
@@ -31,6 +32,15 @@ export function AnswerView({ answer, onInterpretationEdit, onReadingChosen }: An
     [answer.evidence]
   );
   const [drawerRecordIds, setDrawerRecordIds] = useState<readonly string[] | null>(null);
+
+  useEffect(() => {
+    if (drawerRecordIds === null) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setDrawerRecordIds(null);
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [drawerRecordIds]);
 
   function openEvidence(recordIds: readonly string[]) {
     // Only records the checker attached may open — a reference the checker
@@ -129,7 +139,7 @@ export function AnswerView({ answer, onInterpretationEdit, onReadingChosen }: An
                 const record = evidenceById.get(id);
                 return record ? (
                   <li key={id} className="drawer-record">
-                    <pre className="evidence-placeholder">{record.id}</pre>
+                    <EvidenceRecordCard record={record} />
                   </li>
                 ) : null;
               })}
