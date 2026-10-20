@@ -284,3 +284,511 @@ body {
   color: var(--ink);
   font-weight: 600;
 }
+
+/* --- Tint variable for the accent surfaces ---------------------------------- */
+
+:root {
+  --tint: #f1ebe4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tint: #221d1a;
+  }
+}
+
+/* --- The answer view --------------------------------------------------------- */
+
+.answer-page {
+  max-width: 60rem;
+}
+
+.scenario-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.asked-question {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.asked-text {
+  color: var(--ink);
+  font-style: italic;
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  border-top: 2px solid var(--ink);
+  padding-top: 1.25rem;
+}
+
+.answer-part {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.answer-part-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.answer-part-number {
+  color: var(--accent);
+}
+
+.answer-part-mark {
+  color: var(--accent);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+/* Buttons -------------------------------------------------------------------- */
+
+.button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--ink);
+}
+
+.button.primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.button.subtle {
+  border-color: transparent;
+  color: var(--accent);
+  padding-left: 0;
+}
+
+.button.chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Interpretation (part 1) ----------------------------------------------------- */
+
+.interpretation-statement {
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.interpretation-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.provenance {
+  color: var(--accent);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.term-lay {
+  font-style: italic;
+}
+
+.interpretation-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.edit-field-label {
+  color: var(--muted);
+}
+
+.edit-field textarea {
+  font: inherit;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  resize: vertical;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Requirements (part 2) ------------------------------------------------------- */
+
+.requirements-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.source-tag {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.source-tag[data-source-kind='code'] {
+  color: var(--accent);
+}
+
+.source-tag[data-source-kind='inference'] {
+  color: var(--accent);
+  font-style: italic;
+}
+
+/* Candidate matrix (part 3) --------------------------------------------------- */
+
+.matrix-scroll {
+  overflow-x: auto;
+}
+
+.matrix {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.matrix th,
+.matrix td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.matrix thead th {
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.matrix-product-col {
+  width: 9rem;
+}
+
+.matrix-product {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.matrix-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 14rem;
+}
+
+.verdict-line {
+  font-weight: 600;
+}
+
+.verdict-mark {
+  display: inline-block;
+  width: 1rem;
+  text-align: center;
+}
+
+.verdict-meet .verdict-mark {
+  color: var(--accent);
+}
+
+.verdict-fail .verdict-mark {
+  color: var(--ink);
+}
+
+.verdict-unknown .verdict-mark {
+  color: var(--muted);
+}
+
+.cell-reason,
+.cell-comparability,
+.cell-resolve {
+  display: block;
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.cell-comparability {
+  border-left: 2px solid var(--accent);
+  padding-left: 0.4rem;
+}
+
+/* Commentary (part 4) — visibly separated from the evidence -------------------- */
+
+.commentary {
+  border: 1px dashed var(--accent);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  background: var(--tint);
+}
+
+.commentary-line {
+  line-height: 1.5;
+}
+
+/* Unknowns (part 5) ------------------------------------------------------------ */
+
+.unknowns-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.answer .unknown-row {
+  border-left: 3px solid var(--muted);
+  padding: 0.35rem 0 0.35rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.answer .unknown-row[data-status='search-failed'] {
+  border-left-color: var(--accent);
+}
+
+.unknown-headline {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.answer .unknown-property {
+  font-weight: 600;
+}
+
+.unknown-status {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.answer .unknown-reason {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+/* Conflicts --------------------------------------------------------------------- */
+
+.conflicts-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.conflict-row {
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.conflict-headline {
+  font-weight: 600;
+}
+
+.conflict-description {
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+/* Evidence cards and the drawer (part 6) ---------------------------------------- */
+
+.sources-list,
+.drawer-records {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.source-open {
+  all: unset;
+  display: block;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.source-open:hover .evidence-card,
+.source-open:focus-visible .evidence-card {
+  border-color: var(--accent);
+}
+
+.evidence-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.evidence-card-source {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.evidence-card-quote {
+  border-left: 2px solid var(--accent);
+  padding-left: 0.6rem;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.evidence-card-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.authority-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.evidence-card-value {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.evidence-card-value dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Verification badges — only human-verified may look checked --------------------- */
+
+.badge-verified {
+  background: var(--accent);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+/* Question back and refusal -------------------------------------------------------- */
+
+.question-back {
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+
+.question-back-ambiguity {
+  line-height: 1.5;
+}
+
+.question-back-readings {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.reading-name {
+  font-weight: 600;
+}
+
+.reading-change {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.refusal {
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+
+.refusal-reason {
+  line-height: 1.5;
+}
+
+/* The evidence drawer ---------------------------------------------------------------- */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  z-index: 50;
+}
+
+.evidence-drawer {
+  background: var(--paper);
+  color: var(--ink);
+  width: min(28rem, 92vw);
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-left: 1px solid var(--border);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-header h2 {
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.drawer-records {
+  padding-bottom: 2rem;
+}
