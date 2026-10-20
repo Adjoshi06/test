@@ -13,23 +13,43 @@ import type {
 } from './types';
 
 /**
- * Postgres error surface we map on. PGlite errors carry the SQLSTATE code and
- * the violated constraint's name.
+ * Postgres error surface we map on. Drizzle wraps engine errors in a
+ * DrizzleQueryError ("Failed query: …") whose `cause` is the original PGlite
+ * error carrying the SQLSTATE code and the violated constraint's name.
  */
 interface DbConstraintError {
-  code?: string;
+  code: string;
   constraint?: string;
 }
 
-function isConstraintError(e: unknown): e is DbConstraintError {
-  return (
-    typeof e === 'object' &&
-    e !== null &&
-    'code' in e &&
-    typeof e.code === 'string' &&
-    'constraint' in e &&
-    typeof e.constraint === 'string'
-  );
+/** Walk the cause chain (bounded) to find the underlying engine error. */
+function findConstraintError(e: unknown): DbConstraintError | null {
+  let current: unknown = e;
+  for (let depth = 0; depth < 6 && current !== null && current !== undefined; depth += 1) {
+    if (
+      typeof current === 'object' &&
+      'code' in current &&
+      typeof current.code === 'string' &&
+      current.code.startsWith('23') // integrity-violation SQLSTATE class
+    ) {
+      const constraint =
+        'constraint' in current && typeof current.constraint === 'string'
+          ? current.constraint
+          : undefined;
+      return { code: current.code, constraint };
+    }
+    current = current instanceof Error ? current.cause : undefined;
+  }
+  return null;
+}
+
+/** The root error of a cause chain — what a LibraryIntegrityError carries. */
+function rootCause(e: unknown): unknown {
+  let current: unknown = e;
+  while (current instanceof Error && current.cause !== undefined && current.cause !== null) {
+    current = current.cause;
+  }
+  return current;
 }
 
 /**
@@ -38,11 +58,12 @@ function isConstraintError(e: unknown): e is DbConstraintError {
  * recognized so unknown failures surface untouched — never swallowed.
  */
 function toIntegrityError(e: unknown): LibraryIntegrityError | null {
-  if (!isConstraintError(e) || (e.code !== '23505' && e.code !== '23514' && e.code !== '23503')) {
+  const db = findConstraintError(e);
+  if (db === null) {
     return null;
   }
-  const cause = e;
-  switch (e.constraint) {
+  const cause = rootCause(e);
+  switch (db.constraint) {
     case 'documents_title_nonempty':
       return new LibraryIntegrityError('document title must not be empty', { cause });
     case 'documents_owner_id_users_id_fk':
@@ -77,13 +98,22 @@ function toIntegrityError(e: unknown): LibraryIntegrityError | null {
         { cause }
       );
     default:
-      // A non-empty check on a column we did not name individually.
-      return e.code === '23514'
-        ? new LibraryIntegrityError('a required library field must not be empty', {
-            constraint: e.constraint,
-            cause,
-          })
-        : null;
+      // Foreign-key and unique violations we name individually above; the
+      // remaining 23514 checks are the non-empty rules on columns we did not
+      // name individually. Anything else surfaces untouched.
+      if (db.code === '23514') {
+        return new LibraryIntegrityError('a required library field must not be empty', {
+          constraint: db.constraint,
+          cause,
+        });
+      }
+      if (db.code === '23505') {
+        return new LibraryIntegrityError('this library record already exists', {
+          constraint: db.constraint,
+          cause,
+        });
+      }
+      return null;
   }
 }
 
