@@ -14,6 +14,8 @@ import { CommentaryPanel } from './CommentaryPanel';
 import { ConflictsPanel } from './ConflictsPanel';
 import { EvidenceRecordCard } from './EvidenceRecordCard';
 import { InterpretationPanel, type InterpretationEdit } from './InterpretationPanel';
+import { QuestionBackPanel } from './QuestionBackPanel';
+import { RefusalPanel } from './RefusalPanel';
 import { RequirementsPanel } from './RequirementsPanel';
 import { SourcesPanel } from './SourcesPanel';
 import { UnknownsPanel } from './UnknownsPanel';
@@ -79,40 +81,15 @@ export function AnswerView({ answer, onInterpretationEdit, onReadingChosen }: An
       )}
 
       {answer.outcome === 'clarify' && answer.questionBack && (
-        <section
-          className="answer-part question-back"
-          data-outcome-panel="clarify"
-          aria-label="A question back"
-        >
-          <h2 className="answer-part-title">Before any answer — the question is ambiguous</h2>
-          <p className="question-back-ambiguity">{answer.questionBack.ambiguity}</p>
-          <ul className="question-back-readings">
-            {answer.questionBack.readings.map((reading) => (
-              <li key={reading.reading}>
-                <p className="reading-name">{reading.reading}</p>
-                <p className="reading-change">
-                  choosing it would change: {reading.whatItWouldChange}
-                </p>
-                {onReadingChosen !== undefined && (
-                  <button
-                    type="button"
-                    className="button"
-                    onClick={() => onReadingChosen(reading.reading)}
-                  >
-                    Answer for this reading
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
+        <QuestionBackPanel questionBack={answer.questionBack} onReadingChosen={onReadingChosen} />
       )}
 
       {answer.outcome === 'refuse' && answer.refusal && (
-        <section className="answer-part refusal" data-outcome-panel="refuse" aria-label="No answer">
-          <h2 className="answer-part-title">No answer — and why</h2>
-          <p className="refusal-reason">{answer.refusal.reason}</p>
-        </section>
+        <RefusalPanel
+          refusal={answer.refusal}
+          unknowns={answer.unknowns}
+          onOpenEvidence={openEvidence}
+        />
       )}
 
       {drawerRecordIds !== null && (

@@ -792,3 +792,7 @@ body {
 .drawer-records {
   padding-bottom: 2rem;
 }
+
+.refusal-status {
+  color: var(--accent);
+}
