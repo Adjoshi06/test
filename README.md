@@ -15,7 +15,7 @@ TypeScript. The seeded library is synthetic.
 
 ```bash
 npm ci
-docker compose up -d db   # Postgres 16 + pgvector (wired up in later PRs; the shell runs without it)
+docker compose up -d db   # Postgres 16 + pgvector (the app server wires to it in a later PR)
 npm run dev               # http://localhost:3000
 ```
 
@@ -28,6 +28,18 @@ npm run dev               # http://localhost:3000
 | `npm run typecheck`    | `tsc --noEmit`                   |
 | `npm run test`         | Vitest unit tests                |
 | `npm run build`        | Production build                 |
+| `npm run db:generate`  | Emit a migration from the schema |
+| `npm run db:migrate`   | Apply migrations locally         |
+
+## Database
+
+Drizzle owns the schema and migrations. Change `src/db/schema.ts`, run
+`npm run db:generate`, and commit the generated SQL under `src/db/migrations/` — never
+hand-edit a migration or its snapshot. The library service (`src/lib/library/`) is the only
+code path that reads or writes the library; every row carries a visibility `owner_id`, and
+every query is scoped by the caller. Tests run on PGlite — in-process Postgres with the
+same engine semantics (enums, checks, composite foreign keys) — so `npm test` needs no
+services.
 
 ## Eval harness
 

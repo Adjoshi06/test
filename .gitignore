@@ -3,3 +3,4 @@ node_modules/
 .eval/
 *.tsbuildinfo
 .DS_Store
+.local/
