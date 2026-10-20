@@ -87,6 +87,34 @@ export const documents = pgTable(
 );
 
 /**
+ * A product the office selects among — task chairs, luminaires, tiles. The slug
+ * is the productId vocabulary the reasoner's records and drafts use, so one
+ * term means one thing across the model's proposals and the library's facts.
+ */
+export const products = pgTable(
+  'products',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id),
+    /** e.g. 'halden-task-chair' — the productId the reasoner's records carry. */
+    slug: text('slug').notNull(),
+    name: text('name').notNull(),
+    /** Browse aid, e.g. 'task chair'; null when uncategorised. */
+    category: text('category'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // Target for the composite tenancy foreign key on values.
+    unique('products_id_owner_key').on(t.id, t.ownerId),
+    unique('products_owner_slug_key').on(t.ownerId, t.slug),
+    check('products_slug_nonempty', sql`length(trim(${t.slug})) > 0`),
+    check('products_name_nonempty', sql`length(trim(${t.name})) > 0`),
+  ]
+);
+
+/**
  * A place in a document: an exact locator plus the verbatim quote sitting
  * there. Values point at a passage — never at a document alone.
  */
@@ -138,6 +166,13 @@ export const extractedValues = pgTable(
     verification: verificationStateEnum('verification').notNull(),
     /** Present exactly when verification is 'human-verified' (CHECK below). */
     verifiedBy: uuid('verified_by'),
+    /**
+     * The product this value is about — null for values that are not about a
+     * product (code requirements, brief clauses). Sits on the value, not the
+     * document, because what is known about a product may come from any
+     * knowledge body; authority stays recorded per value and never blends.
+     */
+    productId: uuid('product_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -146,6 +181,12 @@ export const extractedValues = pgTable(
       name: 'extracted_values_passage_owner_fkey',
       columns: [t.passageId, t.ownerId],
       foreignColumns: [passages.id, passages.ownerId],
+    }),
+    // A value can only point at a product of the same owner.
+    foreignKey({
+      name: 'extracted_values_product_owner_fkey',
+      columns: [t.productId, t.ownerId],
+      foreignColumns: [products.id, products.ownerId],
     }),
     // A verifier must be a real user.
     foreignKey({

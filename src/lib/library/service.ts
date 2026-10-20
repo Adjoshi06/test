@@ -1,13 +1,17 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, count, eq, inArray } from 'drizzle-orm';
 import type { LibraryDb } from '@/db/client';
-import { documents, extractedValues, passages } from '@/db/schema';
+import { documents, extractedValues, passages, products, users } from '@/db/schema';
 import { LibraryAccessError, LibraryIntegrityError, LibraryNotFoundError } from './errors';
 import type {
   DocumentRow,
   NewDocument,
   NewPassage,
+  NewProduct,
   NewValue,
   PassageRow,
+  ProductRow,
+  ProductValueEvidence,
+  ProductWithCount,
   ValueRow,
   Viewer,
 } from './types';
@@ -90,6 +94,22 @@ function toIntegrityError(e: unknown): LibraryIntegrityError | null {
         'a value must sit on a passage that exists and belongs to the same owner',
         { cause }
       );
+    case 'extracted_values_product_owner_fkey':
+      return new LibraryIntegrityError(
+        'a value must point at a product that exists and belongs to the same owner',
+        { cause }
+      );
+    case 'products_owner_id_users_id_fk':
+      return new LibraryIntegrityError('the product owner must be an existing user', { cause });
+    case 'products_owner_slug_key':
+      return new LibraryIntegrityError(
+        'this product slug is already in the library — one term means one product',
+        { cause }
+      );
+    case 'products_slug_nonempty':
+      return new LibraryIntegrityError('product slug must not be empty', { cause });
+    case 'products_name_nonempty':
+      return new LibraryIntegrityError('product name must not be empty', { cause });
     case 'extracted_values_verified_by_fkey':
       return new LibraryIntegrityError('the verifier must be an existing user', { cause });
     case 'extracted_values_verifier_matches_state':
@@ -209,10 +229,36 @@ export class LibraryService {
   }
 
   /**
+   * Record a product: the slug is the productId vocabulary the reasoner's
+   * records and drafts carry, so one term means one product.
+   */
+  async createProduct(input: NewProduct): Promise<ProductRow> {
+    const viewer = this.requireViewer();
+    if (!input.slug.trim()) {
+      throw new LibraryIntegrityError('product slug must not be empty');
+    }
+    if (!input.name.trim()) {
+      throw new LibraryIntegrityError('product name must not be empty');
+    }
+    return this.insertOne('product', () =>
+      this.db
+        .insert(products)
+        .values({
+          ownerId: viewer.userId,
+          slug: input.slug.trim(),
+          name: input.name.trim(),
+          category: input.category?.trim() || null,
+        })
+        .returning()
+    );
+  }
+
+  /**
    * Record a value under its evidence. The passage — document, locator,
    * verbatim quote — must already exist and belong to the viewer: the
    * persistence layer rejects any value that cannot resolve to a place in a
-   * source document.
+   * source document. When the value is about a product, the product must
+   * exist and belong to the viewer too.
    */
   async recordValue(input: NewValue): Promise<ValueRow> {
     const viewer = this.requireViewer();
@@ -242,6 +288,18 @@ export class LibraryService {
     if (passage[0] === undefined) {
       throw new LibraryNotFoundError('Passage');
     }
+    // A value may name its product; when it does, that product must be the
+    // viewer's. Missing and foreign products are indistinguishable.
+    if (input.productId !== undefined) {
+      const product = await this.db
+        .select({ id: products.id })
+        .from(products)
+        .where(and(eq(products.id, input.productId), eq(products.ownerId, viewer.userId)))
+        .limit(1);
+      if (product[0] === undefined) {
+        throw new LibraryNotFoundError('Product');
+      }
+    }
     return this.insertOne('value', () =>
       this.db
         .insert(extractedValues)
@@ -254,6 +312,7 @@ export class LibraryService {
           authority: input.authority,
           verification: input.verification,
           verifiedBy: wantsVerifier ? input.verifiedBy : null,
+          productId: input.productId ?? null,
         })
         .returning()
     );
@@ -329,5 +388,111 @@ export class LibraryService {
         .orderBy(extractedValues.createdAt);
     }
     return { document, passages: documentPassages, values: documentValues };
+  }
+
+  /**
+   * The viewer's products with how many recorded values are about each — the
+   * browse view. Unauthenticated callers get nothing — an empty list, never
+   * another owner's material.
+   */
+  async listProducts(): Promise<ProductWithCount[]> {
+    if (this.viewer === null) {
+      return [];
+    }
+    const rows = await this.db
+      .select({ product: products, valueCount: count(extractedValues.id) })
+      .from(products)
+      .leftJoin(
+        extractedValues,
+        and(
+          eq(extractedValues.productId, products.id),
+          eq(extractedValues.ownerId, this.viewer.userId)
+        )
+      )
+      .where(eq(products.ownerId, this.viewer.userId))
+      .groupBy(products.id)
+      .orderBy(products.createdAt);
+    return rows.map((row) => ({ product: row.product, valueCount: Number(row.valueCount) }));
+  }
+
+  /**
+   * Everything known about a product: each value about it with the evidence it
+   * resolves to — document, locator, verbatim quote, verifier. Missing,
+   * foreign, and unauthenticated lookups are indistinguishable: all return
+   * null, so invisibility never leaks existence.
+   */
+  async getProduct(
+    slug: string
+  ): Promise<{ product: ProductRow; values: ProductValueEvidence[] } | null> {
+    if (this.viewer === null) {
+      return null;
+    }
+    const productRows = await this.db
+      .select()
+      .from(products)
+      .where(and(eq(products.slug, slug), eq(products.ownerId, this.viewer.userId)))
+      .limit(1);
+    const product = productRows[0];
+    if (product === undefined) {
+      return null;
+    }
+    const evidence = await this.db
+      .select({
+        value: extractedValues,
+        documentId: documents.id,
+        documentTitle: documents.title,
+        documentKind: documents.kind,
+        documentJurisdiction: documents.jurisdiction,
+        documentEdition: documents.edition,
+        locator: passages.locator,
+        quote: passages.quote,
+        verifiedByName: users.displayName,
+      })
+      .from(extractedValues)
+      .innerJoin(passages, eq(extractedValues.passageId, passages.id))
+      .innerJoin(documents, eq(passages.documentId, documents.id))
+      .leftJoin(users, eq(extractedValues.verifiedBy, users.id))
+      .where(
+        and(
+          eq(extractedValues.productId, product.id),
+          eq(extractedValues.ownerId, this.viewer.userId)
+        )
+      )
+      .orderBy(extractedValues.createdAt);
+    return {
+      product,
+      values: evidence.map((row) => ({
+        value: row.value,
+        documentId: row.documentId,
+        documentTitle: row.documentTitle,
+        documentKind: row.documentKind,
+        documentJurisdiction: row.documentJurisdiction,
+        documentEdition: row.documentEdition,
+        locator: row.locator,
+        quote: row.quote,
+        verifiedByName: row.verifiedByName,
+      })),
+    };
+  }
+
+  /**
+   * Distinct (property, method) pairs recorded anywhere in the viewer's
+   * library — the substrate the product page computes unknowns from
+   * deterministically: a property the library knows about elsewhere but holds
+   * no value for on this product is not-found, and the methods seen elsewhere
+   * say what would resolve it.
+   */
+  async listLibraryProperties(): Promise<Array<{ propertyId: string; methodId: string }>> {
+    if (this.viewer === null) {
+      return [];
+    }
+    return this.db
+      .selectDistinct({
+        propertyId: extractedValues.propertyId,
+        methodId: extractedValues.methodId,
+      })
+      .from(extractedValues)
+      .where(eq(extractedValues.ownerId, this.viewer.userId))
+      .orderBy(extractedValues.propertyId, extractedValues.methodId);
   }
 }
