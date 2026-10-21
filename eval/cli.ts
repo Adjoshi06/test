@@ -5,26 +5,14 @@
 // run exits 1 when any case fails — a baseline may not be minted from a red run.
 // compare exits 1 on any regression — CI gates on this.
 
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { loadCases } from './cases';
 import { compareResults, formatReport, hasRegressions } from './compare';
 import { ScriptedEngine } from './engine';
 import { SCRIPTED_ANSWERS, SCRIPTED_LIBRARY } from './fixtures';
 import { runHarness } from './run';
-import { CaseParseError, parseCaseFile, parseHarnessResults } from './schema';
-import type { EvalCase } from './schema';
-
-const CASES_DIR = 'eval/cases';
-
-async function loadCases(dir: string): Promise<EvalCase[]> {
-  const files = (await readdir(dir)).filter((name) => name.endsWith('.cases.json')).sort();
-  const cases: EvalCase[] = [];
-  for (const file of files) {
-    const raw: unknown = JSON.parse(await readFile(join(dir, file), 'utf8'));
-    cases.push(...parseCaseFile(raw, file));
-  }
-  return cases;
-}
+import { CaseParseError, parseHarnessResults } from './schema';
 
 function parseArgs(argv: readonly string[]): {
   options: Record<string, string>;
@@ -48,7 +36,7 @@ function parseArgs(argv: readonly string[]): {
 }
 
 async function run(outPath: string | undefined): Promise<number> {
-  const cases = await loadCases(CASES_DIR);
+  const cases = await loadCases();
   const engine = new ScriptedEngine(SCRIPTED_ANSWERS);
   const results = runHarness(
     cases,

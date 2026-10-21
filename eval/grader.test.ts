@@ -12,7 +12,7 @@ const discoveryCase: EvalCase = {
   title: 'Discovery — task chairs',
   kind: 'discovery',
   question: 'show me task chairs',
-  expected: { candidateIds: ['halden-task-chair'] },
+  expected: { candidateIds: ['halden-task-chair', 'vind-desk-chair'] },
 };
 
 describe('gradeCase', () => {
