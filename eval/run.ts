@@ -17,14 +17,19 @@ import { STANDING_QUESTIONS } from './schema';
 export const HARNESS_VERSION = 1 as const;
 export const ENGINE_NAME = 'scripted-stub';
 
-export function runHarness(
+export async function runHarness(
   cases: readonly EvalCase[],
-  answer: (question: string) => AnswerDraft,
-  resolveRecord: ResolveRecord
-): HarnessResults {
-  const caseResults: CaseResult[] = [...cases]
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map((evalCase) => gradeCase(evalCase, answer(evalCase.question), resolveRecord));
+  answer: (question: string) => AnswerDraft | Promise<AnswerDraft>,
+  resolveRecord: ResolveRecord,
+  engineName: string = ENGINE_NAME
+): Promise<HarnessResults> {
+  // Sorted case order is preserved through Promise.all — results stay
+  // byte-identical for identical behavior, now with async engines.
+  const caseResults: CaseResult[] = await Promise.all(
+    [...cases]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(async (evalCase) => gradeCase(evalCase, await answer(evalCase.question), resolveRecord))
+  );
 
   const perQuestion = Object.fromEntries(
     STANDING_QUESTIONS.map((question) => [question, { passed: 0, failed: 0 }])
@@ -38,7 +43,7 @@ export function runHarness(
 
   return {
     harnessVersion: HARNESS_VERSION,
-    engine: ENGINE_NAME,
+    engine: engineName,
     perQuestion,
     cases: caseResults,
     allPassed: caseResults.every((result) => result.passed),

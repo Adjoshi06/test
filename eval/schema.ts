@@ -45,6 +45,8 @@ export interface EvalCase {
     candidateIds?: string[];
     /** Properties that must stay unknown — the corpus cannot support a value for them. */
     unknownProperties?: string[];
+    /** Properties unknown because the search itself did not complete — distinct from not-found. */
+    searchFailedProperties?: string[];
   };
 }
 
@@ -57,7 +59,11 @@ export type Verification = 'human-verified' | 'interpreted' | 'machine-read';
 
 export interface ScriptedRecord {
   id: string;
+  /** The product this record's value belongs to — the search tool filters on it. */
+  productId: string;
   propertyId: string;
+  /** How the value was measured/stated — the corpus's own method vocabulary. */
+  methodId: string;
   documentTitle: string;
   locator: string;
   quote: string;
@@ -80,12 +86,24 @@ export interface ProposedCandidate {
 export interface ProposedUnknown {
   propertyId: string;
   reason: string;
+  /**
+   * Absence of evidence ('not-found') is distinct from a search that did not
+   * complete ('search-failed'); both are reported, neither becomes a value.
+   * Defaults to 'not-found'.
+   */
+  status?: UnknownStatus;
 }
+
+export type UnknownStatus = 'not-found' | 'search-failed';
 
 export interface AnswerDraft {
   outcome: EngineOutcome;
   candidates?: ProposedCandidate[];
   unknowns?: ProposedUnknown[];
+  /** Required for a genuine question back: the readings the user must choose between. */
+  readings?: string[];
+  /** Required for a refusal: why the sources cannot support an answer. */
+  refusalReason?: string;
 }
 
 export type ResolveRecord = (recordId: string) => ScriptedRecord | undefined;
@@ -104,6 +122,8 @@ export interface CaseResult {
   outcome: EngineOutcome;
   passed: boolean;
   questions: Record<StandingQuestionId, QuestionVerdict>;
+  /** The refusal's reason when the outcome was refuse — recorded so evidence is self-explanatory. */
+  refusalReason?: string;
 }
 
 export interface QuestionSummary {
@@ -174,6 +194,7 @@ export function parseCaseFile(raw: unknown, source: string): EvalCase[] {
         throw new CaseParseError(`${source}: ${at}.expected: expected an object`);
       const candidateIds = expected['candidateIds'];
       const unknownProperties = expected['unknownProperties'];
+      const searchFailedProperties = expected['searchFailedProperties'];
       if (candidateIds !== undefined) {
         parsed.expected.candidateIds = stringArray(
           candidateIds,
@@ -185,6 +206,13 @@ export function parseCaseFile(raw: unknown, source: string): EvalCase[] {
         parsed.expected.unknownProperties = stringArray(
           unknownProperties,
           `${at}.expected.unknownProperties`,
+          source
+        );
+      }
+      if (searchFailedProperties !== undefined) {
+        parsed.expected.searchFailedProperties = stringArray(
+          searchFailedProperties,
+          `${at}.expected.searchFailedProperties`,
           source
         );
       }
@@ -255,7 +283,17 @@ export function parseHarnessResults(raw: unknown, source: string): HarnessResult
       questions[question] = { verdict: verdict['verdict'], reason: verdict['reason'] };
     }
 
-    return { caseId, outcome: outcome as EngineOutcome, passed, questions };
+    const refusalReason = entry['refusalReason'];
+    if (refusalReason !== undefined && typeof refusalReason !== 'string') {
+      throw new CaseParseError(`${source}: ${at}.refusalReason must be a string when present`);
+    }
+    return {
+      caseId,
+      outcome: outcome as EngineOutcome,
+      passed,
+      questions,
+      ...(refusalReason === undefined ? {} : { refusalReason }),
+    };
   });
 
   const allPassed = raw['allPassed'];

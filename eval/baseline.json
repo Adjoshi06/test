@@ -3,23 +3,23 @@
   "engine": "scripted-stub",
   "perQuestion": {
     "candidates": {
-      "passed": 1,
+      "passed": 15,
       "failed": 0
     },
     "traceability": {
-      "passed": 1,
+      "passed": 15,
       "failed": 0
     },
     "unknown-honesty": {
-      "passed": 1,
+      "passed": 15,
       "failed": 0
     },
     "verification-honesty": {
-      "passed": 1,
+      "passed": 15,
       "failed": 0
     },
     "clarify-not-guess": {
-      "passed": 1,
+      "passed": 15,
       "failed": 0
     }
   },
@@ -31,7 +31,385 @@
       "questions": {
         "candidates": {
           "verdict": "pass",
+          "reason": "Candidates matched: halden-task-chair, vind-desk-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 2 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a discovery question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-10-code-flame-class",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: mera-conference-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 1 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "Unknown properties stayed unknown, with search failures reported as search-failed (flame-spread): flame-spread."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a code question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-11-code-atrium-finish",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: mera-conference-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 1 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a code question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-12-ambiguous-soundproof",
+      "outcome": "clarify",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "No candidates expected; none emitted."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "No claims emitted; nothing to resolve."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Question back names the readings: speech privacy between rooms (sound isolation, dB/description) · reverberation control inside the room (absorption class) · impact noise from adjacent floors (impact insulation)."
+        }
+      }
+    },
+    {
+      "caseId": "tc-13-ambiguous-lighting",
+      "outcome": "clarify",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "No candidates expected; none emitted."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "No claims emitted; nothing to resolve."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Question back names the readings: task lighting over the conference table · ambient fill for the whole room · wall wash for the presentation wall."
+        }
+      }
+    },
+    {
+      "caseId": "tc-14-unsupported-best-chair",
+      "outcome": "refuse",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "No candidates expected; none emitted."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "No claims emitted; nothing to resolve."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Refusal states its reason: The library records measured values, not verdicts — no recorded ranking can support “best”. Name the requirements to meet."
+        }
+      }
+    },
+    {
+      "caseId": "tc-15-unsupported-price",
+      "outcome": "refuse",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "No candidates expected; none emitted."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "No claims emitted; nothing to resolve."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "Unknown properties stayed unknown: price."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Refusal states its reason: The library records specifications, not commercial terms — no pricing exists to compare."
+        }
+      }
+    },
+    {
+      "caseId": "tc-2-discovery-pendant-lighting",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: lume-pendant."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 1 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a discovery question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-3-discovery-acoustic-soffit",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: hull-acoustic-baffle, vela-metal-raft."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 2 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a discovery question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-4-discovery-visitor-chairs",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: tove-visitor-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 1 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a discovery question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-5-single-halden-fire-rating",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
           "reason": "Candidates matched: halden-task-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "No claims emitted; nothing to resolve."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "Unknown properties stayed unknown: flame-spread."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a single-product question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-6-single-mera-fire-class",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: mera-conference-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 1 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a single-product question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-7-single-vind-black",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: vind-desk-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 1 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a single-product question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-8-lay-ergonomic-chairs",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: halden-task-chair, vind-desk-chair."
+        },
+        "traceability": {
+          "verdict": "pass",
+          "reason": "All 2 claim(s) resolved to library records."
+        },
+        "unknown-honesty": {
+          "verdict": "pass",
+          "reason": "No unknown expectations; unknowns carry reasons."
+        },
+        "verification-honesty": {
+          "verdict": "pass",
+          "reason": "Verification states carried honestly — human-verified records name their verifier."
+        },
+        "clarify-not-guess": {
+          "verdict": "pass",
+          "reason": "Outcome answer is what a discovery question should produce."
+        }
+      }
+    },
+    {
+      "caseId": "tc-9-lay-warm-light",
+      "outcome": "answer",
+      "passed": true,
+      "questions": {
+        "candidates": {
+          "verdict": "pass",
+          "reason": "Candidates matched: lume-pendant."
         },
         "traceability": {
           "verdict": "pass",

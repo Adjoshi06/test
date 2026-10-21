@@ -6,7 +6,129 @@
       "kind": "discovery",
       "question": "show me task chairs",
       "expected": {
-        "candidateIds": ["halden-task-chair"]
+        "candidateIds": ["halden-task-chair", "vind-desk-chair"]
+      }
+    },
+    {
+      "id": "tc-2-discovery-pendant-lighting",
+      "title": "Discovery — pendant over the conference table",
+      "kind": "discovery",
+      "question": "we need a pendant over the conference table",
+      "expected": {
+        "candidateIds": ["lume-pendant"]
+      }
+    },
+    {
+      "id": "tc-3-discovery-acoustic-soffit",
+      "title": "Discovery — acoustic treatment for the exposed soffit",
+      "kind": "discovery",
+      "question": "what can we hang from the exposed soffit to tame the echo?",
+      "expected": {
+        "candidateIds": ["hull-acoustic-baffle", "vela-metal-raft"]
+      }
+    },
+    {
+      "id": "tc-4-discovery-visitor-chairs",
+      "title": "Discovery — visitor chairs for the reception",
+      "kind": "discovery",
+      "question": "show me visitor chairs for the reception",
+      "expected": {
+        "candidateIds": ["tove-visitor-chair"]
+      }
+    },
+    {
+      "id": "tc-5-single-halden-fire-rating",
+      "title": "Single product — the Halden fire rating the library lacks",
+      "kind": "single-product",
+      "question": "what's the fire rating on the Halden task chair?",
+      "expected": {
+        "candidateIds": ["halden-task-chair"],
+        "unknownProperties": ["flame-spread"]
+      }
+    },
+    {
+      "id": "tc-6-single-mera-fire-class",
+      "title": "Single product — the Mera fire class the library holds",
+      "kind": "single-product",
+      "question": "what fire class does the Mera conference chair have?",
+      "expected": {
+        "candidateIds": ["mera-conference-chair"]
+      }
+    },
+    {
+      "id": "tc-7-single-vind-black",
+      "title": "Single product — Vind in black: found, and it says no",
+      "kind": "single-product",
+      "question": "does the Vind desk chair come in black?",
+      "expected": {
+        "candidateIds": ["vind-desk-chair"]
+      }
+    },
+    {
+      "id": "tc-8-lay-ergonomic-chairs",
+      "title": "Lay terms — “ergonomic” for the developers' desks",
+      "kind": "discovery",
+      "question": "we need ergonomic chairs for the developers' desks",
+      "expected": {
+        "candidateIds": ["halden-task-chair", "vind-desk-chair"]
+      }
+    },
+    {
+      "id": "tc-9-lay-warm-light",
+      "title": "Lay terms — “warm” light over the studio tables",
+      "kind": "discovery",
+      "question": "we want warm light over the studio tables",
+      "expected": {
+        "candidateIds": ["lume-pendant"]
+      }
+    },
+    {
+      "id": "tc-10-code-flame-class",
+      "title": "Code — flame-spread Class A across the desk and conference chairs",
+      "kind": "code",
+      "question": "which of the desk and conference chairs meet flame-spread Class A?",
+      "expected": {
+        "candidateIds": ["mera-conference-chair"],
+        "searchFailedProperties": ["flame-spread"]
+      }
+    },
+    {
+      "id": "tc-11-code-atrium-finish",
+      "title": "Code — IBC 2024 atrium finish requirement, Mera",
+      "kind": "code",
+      "question": "does the Mera conference chair pass the IBC 2024 atrium finish requirement?",
+      "expected": {
+        "candidateIds": ["mera-conference-chair"]
+      }
+    },
+    {
+      "id": "tc-12-ambiguous-soundproof",
+      "title": "Ambiguous — “soundproof” for the United conference room",
+      "kind": "ambiguous",
+      "question": "we need soundproofing for the United conference room",
+      "expected": {}
+    },
+    {
+      "id": "tc-13-ambiguous-lighting",
+      "title": "Ambiguous — lighting for the United conference room",
+      "kind": "ambiguous",
+      "question": "lighting for the United conference room",
+      "expected": {}
+    },
+    {
+      "id": "tc-14-unsupported-best-chair",
+      "title": "Unsupported — “the best chair” is a judgment, not a record",
+      "kind": "unsupported",
+      "question": "which chair is the best?",
+      "expected": {}
+    },
+    {
+      "id": "tc-15-unsupported-price",
+      "title": "Unsupported — pricing exists nowhere in the library",
+      "kind": "unsupported",
+      "question": "which pendant lights are under $300?",
+      "expected": {
+        "unknownProperties": ["price"]
       }
     }
   ]

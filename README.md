@@ -79,6 +79,31 @@ verification-honesty, clarify-not-guess.
   move at least one standing question.
 - All fixtures and the baseline are synthetic (locked decision in the spec).
 
+### Recorded provider runs (evidence, not a gate)
+
+The scripted engine is the CI gate. Alongside it, the same case set and graders can run against
+the real provider (Claude) and be recorded as evidence:
+
+- The provider adapter reads the injected secret `ANTHROPIC_API_KEY` (`SECRET_ANTHROPIC_API_KEY`
+  in the sandbox). Ask in the project thread to have it added; the run never receives a key any
+  other way.
+- `npm run eval:provider` runs the harness over the Claude adapter with the synthetic scripted
+  library as its search fixture and writes `.eval/provider-results.json` (`engine: "claude"`,
+  refusals carrying their reason). Retrieval in the run is a keyword-recall stand-in
+  (`eval/provider-run.ts`): function words are dropped and any significant term recalls, so
+  natural-language questions surface the records a real search would. Genuinely semantic lay
+  terms ("soundproof", "lighting for a room") still miss - that limit shows up in the evidence,
+  not papered over.
+  This measures reasoning and grading over the synthetic library — not live-corpus retrieval;
+  no database-backed search exists yet.
+- Without a key the command exits 2 with its reason. A scripted result is never recorded as a
+  provider run.
+- Review a recorded run against the baseline the same way CI does:
+  `npm run eval:compare -- eval/baseline.json .eval/provider-results.json`. Divergences are
+  evidence about the provider's behavior, not CI failures — the scripted gate decides.
+- Committing a recorded run is deliberate: it documents what the provider did at that head, and
+  the re-record procedure is exactly the two commands above.
+
 ## Conventions
 
 - Conventional commits, authored as `Obvious <obvious@obvious.ai>` with a
