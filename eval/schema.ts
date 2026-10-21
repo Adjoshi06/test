@@ -45,6 +45,8 @@ export interface EvalCase {
     candidateIds?: string[];
     /** Properties that must stay unknown — the corpus cannot support a value for them. */
     unknownProperties?: string[];
+    /** Properties unknown because the search itself did not complete — distinct from not-found. */
+    searchFailedProperties?: string[];
   };
 }
 
@@ -80,12 +82,24 @@ export interface ProposedCandidate {
 export interface ProposedUnknown {
   propertyId: string;
   reason: string;
+  /**
+   * Absence of evidence ('not-found') is distinct from a search that did not
+   * complete ('search-failed'); both are reported, neither becomes a value.
+   * Defaults to 'not-found'.
+   */
+  status?: UnknownStatus;
 }
+
+export type UnknownStatus = 'not-found' | 'search-failed';
 
 export interface AnswerDraft {
   outcome: EngineOutcome;
   candidates?: ProposedCandidate[];
   unknowns?: ProposedUnknown[];
+  /** Required for a genuine question back: the readings the user must choose between. */
+  readings?: string[];
+  /** Required for a refusal: why the sources cannot support an answer. */
+  refusalReason?: string;
 }
 
 export type ResolveRecord = (recordId: string) => ScriptedRecord | undefined;
@@ -174,6 +188,7 @@ export function parseCaseFile(raw: unknown, source: string): EvalCase[] {
         throw new CaseParseError(`${source}: ${at}.expected: expected an object`);
       const candidateIds = expected['candidateIds'];
       const unknownProperties = expected['unknownProperties'];
+      const searchFailedProperties = expected['searchFailedProperties'];
       if (candidateIds !== undefined) {
         parsed.expected.candidateIds = stringArray(
           candidateIds,
@@ -185,6 +200,13 @@ export function parseCaseFile(raw: unknown, source: string): EvalCase[] {
         parsed.expected.unknownProperties = stringArray(
           unknownProperties,
           `${at}.expected.unknownProperties`,
+          source
+        );
+      }
+      if (searchFailedProperties !== undefined) {
+        parsed.expected.searchFailedProperties = stringArray(
+          searchFailedProperties,
+          `${at}.expected.searchFailedProperties`,
           source
         );
       }

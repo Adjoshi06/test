@@ -162,11 +162,13 @@ export const SCRIPTED_ANSWERS: Readonly<Record<string, AnswerDraft>> = {
         propertyId: 'flame-spread',
         reason:
           'Halden: no fire classification in the library — the certificate is pending (not found).',
+        status: 'not-found',
       },
       {
         propertyId: 'flame-spread',
         reason:
           'Vind: the flame-spread search did not complete — the index was unavailable. A retry re-runs it (search failed).',
+        status: 'search-failed',
       },
     ],
   },
@@ -178,15 +180,27 @@ export const SCRIPTED_ANSWERS: Readonly<Record<string, AnswerDraft>> = {
     // “Soundproof” names three different needs rated by different methods —
     // a question back, naming the readings.
     outcome: 'clarify',
+    readings: [
+      'speech privacy between rooms (sound isolation, dB/description)',
+      'reverberation control inside the room (absorption class)',
+      'impact noise from adjacent floors (impact insulation)',
+    ],
   },
   'lighting for the United conference room': {
     // Task lighting over the table, ambient fill, or presentation wall wash —
     // a question back, naming the readings.
     outcome: 'clarify',
+    readings: [
+      'task lighting over the conference table',
+      'ambient fill for the whole room',
+      'wall wash for the presentation wall',
+    ],
   },
   'which chair is the best?': {
     // The library holds specifications, not judgments — a refusal with its reason.
     outcome: 'refuse',
+    refusalReason:
+      'The library records measured values, not verdicts — no recorded ranking can support “best”. Name the requirements to meet.',
     unknowns: [
       {
         propertyId: '*',
@@ -198,6 +212,8 @@ export const SCRIPTED_ANSWERS: Readonly<Record<string, AnswerDraft>> = {
   'which pendant lights are under $300?': {
     // Pricing exists nowhere in the library — a refusal with its reason.
     outcome: 'refuse',
+    refusalReason:
+      'The library records specifications, not commercial terms — no pricing exists to compare.',
     unknowns: [
       {
         propertyId: 'price',

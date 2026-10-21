@@ -103,4 +103,19 @@ describe('the case set', () => {
       }
     }
   });
+
+  it('scripts a search-failed unknown for every search-failed expectation', async () => {
+    const cases = await loadCases();
+    for (const evalCase of cases) {
+      const draft = SCRIPTED_ANSWERS[evalCase.question];
+      for (const propertyId of evalCase.expected.searchFailedProperties ?? []) {
+        expect(
+          (draft?.unknowns ?? []).some(
+            (unknown) => unknown.propertyId === propertyId && unknown.status === 'search-failed'
+          ),
+          `${evalCase.id}: expected ${propertyId} reported search-failed, but the scripted answer carries no such unknown`
+        ).toBe(true);
+      }
+    }
+  });
 });

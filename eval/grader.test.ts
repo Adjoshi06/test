@@ -88,8 +88,93 @@ describe('gradeCase', () => {
       question: 'something quiet for the office',
       expected: {},
     };
-    const result = gradeCase(evalCase, { outcome: 'clarify' }, resolveRecord);
+    const result = gradeCase(
+      evalCase,
+      {
+        outcome: 'clarify',
+        readings: ['sound isolation between rooms', 'reverberation control inside the room'],
+      },
+      resolveRecord
+    );
     expect(result.questions['clarify-not-guess'].verdict).toBe('pass');
+  });
+
+  it('fails clarify-not-guess when a clarify-back names no readings', () => {
+    const evalCase: EvalCase = {
+      id: 'tc-test-ambiguous',
+      title: 'Ambiguous — quiet',
+      kind: 'ambiguous',
+      question: 'something quiet for the office',
+      expected: {},
+    };
+    const result = gradeCase(evalCase, { outcome: 'clarify' }, resolveRecord);
+    expect(result.questions['clarify-not-guess'].verdict).toBe('fail');
+    expect(result.questions['clarify-not-guess'].reason).toContain('readings');
+  });
+
+  it('passes clarify-not-guess when an unsupported question refuses with its reason', () => {
+    const evalCase: EvalCase = {
+      id: 'tc-test-unsupported',
+      title: 'Unsupported — pricing',
+      kind: 'unsupported',
+      question: 'which pendant lights are under $300?',
+      expected: {},
+    };
+    const result = gradeCase(
+      evalCase,
+      { outcome: 'refuse', refusalReason: 'No pricing exists in the library.' },
+      resolveRecord
+    );
+    expect(result.questions['clarify-not-guess'].verdict).toBe('pass');
+  });
+
+  it('fails clarify-not-guess when a refusal carries no reason', () => {
+    const evalCase: EvalCase = {
+      id: 'tc-test-unsupported',
+      title: 'Unsupported — pricing',
+      kind: 'unsupported',
+      question: 'which pendant lights are under $300?',
+      expected: {},
+    };
+    const result = gradeCase(evalCase, { outcome: 'refuse' }, resolveRecord);
+    expect(result.questions['clarify-not-guess'].verdict).toBe('fail');
+    expect(result.questions['clarify-not-guess'].reason).toContain('state why');
+  });
+
+  it('fails traceability when a refusal carries claims', () => {
+    const answer: AnswerDraft = {
+      outcome: 'refuse',
+      refusalReason: 'No pricing exists in the library.',
+      candidates: [{ productId: 'lume-pendant', claims: [{ recordId: 'rec-lume-photometry' }] }],
+    };
+    const result = gradeCase(discoveryCase, answer, resolveRecord);
+    expect(result.questions.traceability.verdict).toBe('fail');
+    expect(result.questions.traceability.reason).toContain('not a vehicle for values');
+  });
+
+  it('fails unknown-honesty when an expected search failure is reported as not-found', () => {
+    const evalCase: EvalCase = {
+      ...discoveryCase,
+      expected: {
+        candidateIds: ['halden-task-chair', 'vind-desk-chair'],
+        unknownProperties: ['flame-spread'],
+        searchFailedProperties: ['flame-spread'],
+      },
+    };
+    const answer: AnswerDraft = {
+      outcome: 'answer',
+      candidates: [{ productId: 'vind-desk-chair', claims: [{ recordId: 'rec-vind-finish' }] }],
+      unknowns: [
+        {
+          propertyId: 'flame-spread',
+          reason: 'No flame-spread entry in the library.',
+          status: 'not-found',
+        },
+      ],
+    };
+    const result = gradeCase(evalCase, answer, resolveRecord);
+    expect(result.questions['unknown-honesty'].verdict).toBe('fail');
+    expect(result.questions['unknown-honesty'].reason).toContain('search-failed');
   });
 
   it('fails candidates and clarify-not-guess when a discovery question refuses', () => {

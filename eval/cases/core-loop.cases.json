@@ -88,7 +88,8 @@
       "kind": "code",
       "question": "which of the desk and conference chairs meet flame-spread Class A?",
       "expected": {
-        "candidateIds": ["mera-conference-chair"]
+        "candidateIds": ["mera-conference-chair"],
+        "searchFailedProperties": ["flame-spread"]
       }
     },
     {

@@ -74,18 +74,25 @@ const traceabilityGrader: Grader = {
     const unresolved = claims
       .filter((claim) => resolveRecord(claim.recordId) === undefined)
       .map((claim) => claim.recordId);
-    return unresolved.length === 0
-      ? {
-          verdict: 'pass',
-          reason:
-            claims.length === 0
-              ? 'No claims emitted; nothing to resolve.'
-              : `All ${claims.length} claim(s) resolved to library records.`,
-        }
-      : {
-          verdict: 'fail',
-          reason: `Claims not resolvable to library records: ${sortedUnique(unresolved).join(', ')}.`,
-        };
+    if (unresolved.length > 0) {
+      return {
+        verdict: 'fail',
+        reason: `Claims not resolvable to library records: ${sortedUnique(unresolved).join(', ')}.`,
+      };
+    }
+    if (answer.outcome !== 'answer' && claims.length > 0) {
+      return {
+        verdict: 'fail',
+        reason: `A ${answer.outcome} carries ${claims.length} claim(s) — a refusal or question-back is not a vehicle for values.`,
+      };
+    }
+    return {
+      verdict: 'pass',
+      reason:
+        claims.length === 0
+          ? `No claims emitted; nothing to resolve.`
+          : `All ${claims.length} claim(s) resolved to library records.`,
+    };
   },
 };
 
@@ -94,6 +101,10 @@ const unknownHonestyGrader: Grader = {
   question: 'unknown-honesty',
   grade({ evalCase, answer, resolveRecord }) {
     const mustStayUnknown = evalCase.expected.unknownProperties ?? [];
+    const searchFailed = evalCase.expected.searchFailedProperties ?? [];
+    // A search-failed expectation coexists with recorded values elsewhere — a
+    // failed search for one product does not unseat a record for another — so
+    // only unknownProperties bans assertions.
     const asserted = collectClaims(answer)
       .map((claim) => resolveRecord(claim.recordId)?.propertyId)
       .filter((propertyId): propertyId is string => propertyId !== undefined)
@@ -113,12 +124,24 @@ const unknownHonestyGrader: Grader = {
         reason: `Unknowns carried without a reason: ${sortedUnique(reasonless).join(', ')}.`,
       };
     }
+    const missingSearchFailed = searchFailed.filter(
+      (propertyId) =>
+        !(answer.unknowns ?? []).some(
+          (unknown) => unknown.propertyId === propertyId && unknown.status === 'search-failed'
+        )
+    );
+    if (missingSearchFailed.length > 0) {
+      return {
+        verdict: 'fail',
+        reason: `Search failures reported as not-found (or omitted) instead of search-failed: ${sortedUnique(missingSearchFailed).join(', ')} — absence of evidence and a failed search are distinct outcomes.`,
+      };
+    }
     return {
       verdict: 'pass',
       reason:
-        mustStayUnknown.length === 0
+        mustStayUnknown.length === 0 && searchFailed.length === 0
           ? 'No unknown expectations; unknowns carry reasons.'
-          : `Unknown properties stayed unknown: ${mustStayUnknown.join(', ')}.`,
+          : `Unknown properties stayed unknown${searchFailed.length > 0 ? `, with search failures reported as search-failed (${searchFailed.join(', ')})` : ''}: ${[...mustStayUnknown, ...searchFailed].join(', ')}.`,
     };
   },
 };
@@ -160,15 +183,33 @@ const clarifyNotGuessGrader: Grader = {
   question: 'clarify-not-guess',
   grade({ evalCase, answer }) {
     const want = EXPECTED_OUTCOME[evalCase.kind];
-    return answer.outcome === want
-      ? {
-          verdict: 'pass',
-          reason: `Outcome ${answer.outcome} is what a ${evalCase.kind} question should produce.`,
-        }
-      : {
-          verdict: 'fail',
-          reason: `A ${evalCase.kind} question must ${describe(want)}; outcome was ${answer.outcome}.`,
-        };
+    if (answer.outcome !== want) {
+      return {
+        verdict: 'fail',
+        reason: `A ${evalCase.kind} question must ${describe(want)}; outcome was ${answer.outcome}.`,
+      };
+    }
+    if (want === 'clarify') {
+      const readings = answer.readings ?? [];
+      return readings.length >= 2
+        ? { verdict: 'pass', reason: `Question back names the readings: ${readings.join(' · ')}.` }
+        : {
+            verdict: 'fail',
+            reason: `A question back must name the readings the user chooses between (got ${readings.length}) — an empty question back is a guess in disguise.`,
+          };
+    }
+    if (want === 'refuse') {
+      return answer.refusalReason !== undefined && answer.refusalReason.trim() !== ''
+        ? { verdict: 'pass', reason: `Refusal states its reason: ${answer.refusalReason}` }
+        : {
+            verdict: 'fail',
+            reason: 'A refusal must state why the sources cannot support an answer.',
+          };
+    }
+    return {
+      verdict: 'pass',
+      reason: `Outcome ${answer.outcome} is what a ${evalCase.kind} question should produce.`,
+    };
   },
 };
 
