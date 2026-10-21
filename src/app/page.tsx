@@ -14,10 +14,12 @@ export default function HomePage() {
       </ul>
       <p>
         <Link href="/products">Browse products</Link> — every value with its locator, method,
-        authority and verification state.
+        authority and verification state. Or <Link href="/answer">open the answer interface</Link> —
+        the six-part answer, question-backs and refusals, rendered from checker output (scripted
+        demo).
       </p>
       <p className="shell-status">
-        Library and product pages are in; the answering loop lands in a subsequent PR. The seeded
+        Library, product pages, firm sign-in, and the answering loop are in this release. The seeded
         library is synthetic.
       </p>
     </main>
