@@ -1,9 +1,12 @@
 // Harness CLI.
 //   tsx eval/cli.ts run [--out=<path>]               run the case set, write results JSON
 //   tsx eval/cli.ts compare <base.json> <head.json>  base-vs-head per-question report
+//   tsx eval/cli.ts provider-run [--out=<path>]      recorded real-provider run (evidence, not a gate)
 //
 // run exits 1 when any case fails — a baseline may not be minted from a red run.
 // compare exits 1 on any regression — CI gates on this.
+// provider-run exits 2 without an API key; a scripted result is never recorded
+// as a provider run.
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
@@ -11,8 +14,9 @@ import { loadCases } from './cases';
 import { compareResults, formatReport, hasRegressions } from './compare';
 import { ScriptedEngine } from './engine';
 import { SCRIPTED_ANSWERS, SCRIPTED_LIBRARY } from './fixtures';
+import { providerReasoner, runProviderHarness } from './provider-run';
 import { runHarness } from './run';
-import { CaseParseError, parseHarnessResults } from './schema';
+import { CaseParseError, parseHarnessResults, type HarnessResults } from './schema';
 
 function parseArgs(argv: readonly string[]): {
   options: Record<string, string>;
@@ -38,12 +42,28 @@ function parseArgs(argv: readonly string[]): {
 async function run(outPath: string | undefined): Promise<number> {
   const cases = await loadCases();
   const engine = new ScriptedEngine(SCRIPTED_ANSWERS);
-  const results = runHarness(
+  const results = await runHarness(
     cases,
     (question) => engine.answer(question),
     (recordId) => SCRIPTED_LIBRARY[recordId]
   );
+  return reportAndWrite(results, outPath ?? '.eval/results.json');
+}
 
+async function providerRun(outPath: string | undefined): Promise<number> {
+  const availability = providerReasoner();
+  if (!availability.available) {
+    console.error(`No real-provider run: ${availability.reason}`);
+    console.error(
+      'A scripted result is never recorded as a provider run. Set the injected secret (ANTHROPIC_API_KEY) and re-run.'
+    );
+    return 2;
+  }
+  const results = await runProviderHarness(availability.reasoner);
+  return reportAndWrite(results, outPath ?? '.eval/provider-results.json');
+}
+
+async function reportAndWrite(results: HarnessResults, target: string): Promise<number> {
   for (const result of results.cases) {
     console.log(`${result.caseId} — ${result.outcome} — ${result.passed ? 'PASS' : 'FAIL'}`);
     for (const question of Object.keys(result.questions) as (keyof typeof result.questions)[]) {
@@ -59,7 +79,6 @@ async function run(outPath: string | undefined): Promise<number> {
     `${results.cases.filter((result) => result.passed).length}/${results.cases.length} case(s) passing.`
   );
 
-  const target = outPath ?? '.eval/results.json';
   await mkdir(dirname(target), { recursive: true });
   await writeFile(target, `${JSON.stringify(results, null, 2)}\n`, 'utf8');
   console.log(`Wrote results to ${target}`);
@@ -79,6 +98,7 @@ async function main(): Promise<number> {
   const { options, positional } = parseArgs(process.argv.slice(2));
   const command = positional[0];
   if (command === 'run') return run(options['out']);
+  if (command === 'provider-run') return providerRun(options['out']);
   if (command === 'compare') {
     const basePath = positional[1];
     const headPath = positional[2];
@@ -88,7 +108,9 @@ async function main(): Promise<number> {
     }
     return compare(basePath, headPath);
   }
-  console.error('usage: tsx eval/cli.ts run [--out=<path>] | compare <base.json> <head.json>');
+  console.error(
+    'usage: tsx eval/cli.ts run [--out=<path>] | compare <base.json> <head.json> | provider-run [--out=<path>]'
+  );
   return 2;
 }
 

@@ -12,7 +12,9 @@ import type { AnswerDraft, ScriptedRecord } from './schema';
 export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   'rec-halden-seat-height': {
     id: 'rec-halden-seat-height',
+    productId: 'halden-task-chair',
     propertyId: 'seat-height-adjustable',
+    methodId: 'stated-range',
     documentTitle: 'Halden task chair — technical specification (synthetic fixture)',
     locator: 'p. 4, §2.1',
     quote: 'Seat height adjustable 42–55 cm via gas lift.',
@@ -21,7 +23,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-halden-finish': {
     id: 'rec-halden-finish',
+    productId: 'halden-task-chair',
     propertyId: 'finish-color',
+    methodId: 'stated-feature',
     documentTitle: 'Halden task chair — technical specification (synthetic fixture)',
     locator: 'p. 5, §3.2',
     quote:
@@ -30,7 +34,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-vind-seat-height': {
     id: 'rec-vind-seat-height',
+    productId: 'vind-desk-chair',
     propertyId: 'seat-height-adjustable',
+    methodId: 'stated-range',
     documentTitle: 'Vind desk chair — technical specification (synthetic fixture)',
     locator: 'p. 2, §1',
     quote: 'Gas-lift seat height 40–52 cm.',
@@ -38,7 +44,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-vind-finish': {
     id: 'rec-vind-finish',
+    productId: 'vind-desk-chair',
     propertyId: 'finish-color',
+    methodId: 'stated-feature',
     documentTitle: 'Vind desk chair — technical specification (synthetic fixture)',
     locator: 'p. 3, §2',
     quote: 'Shell colours: signal grey (RAL 7035) or off-white; seat pad charcoal.',
@@ -46,7 +54,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-mera-flame': {
     id: 'rec-mera-flame',
+    productId: 'mera-conference-chair',
     propertyId: 'flame-spread',
+    methodId: 'astm-e84',
     documentTitle: 'Mera conference chair — technical specification (synthetic fixture)',
     locator: 'p. 4, §3',
     quote:
@@ -55,7 +65,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-lume-photometry': {
     id: 'rec-lume-photometry',
+    productId: 'lume-pendant',
     propertyId: 'color-temperature',
+    methodId: 'lm-79',
     documentTitle: 'Lume pendant light — technical specification (synthetic fixture)',
     locator: 'p. 3, §2',
     quote: 'Light source: LED module, 2700 K, CRI 92, 980 lm delivered.',
@@ -63,7 +75,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-hull-nrc': {
     id: 'rec-hull-nrc',
+    productId: 'hull-acoustic-baffle',
     propertyId: 'acoustic-nrc',
+    methodId: 'astm-c423',
     documentTitle: 'Hull acoustic baffle — technical specification (synthetic fixture)',
     locator: 'p. 2, §1',
     quote: 'Noise reduction coefficient NRC 0.80 (Type J mounting).',
@@ -71,7 +85,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-vela-format': {
     id: 'rec-vela-format',
+    productId: 'vela-metal-raft',
     propertyId: 'panel-format',
+    methodId: 'stated-range',
     documentTitle: 'Vela metal ceiling raft — technical specification (synthetic fixture)',
     locator: 'p. 1, §1',
     quote: 'Suspended raft modules 1200 × 600 mm.',
@@ -79,7 +95,9 @@ export const SCRIPTED_LIBRARY: Readonly<Record<string, ScriptedRecord>> = {
   },
   'rec-tove-finish': {
     id: 'rec-tove-finish',
+    productId: 'tove-visitor-chair',
     propertyId: 'finish-color',
+    methodId: 'stated-feature',
     documentTitle: 'Tove visitor chair — technical specification (synthetic fixture)',
     locator: 'p. 2, §2',
     quote: 'Shell colours: black or off-white.',

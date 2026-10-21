@@ -52,7 +52,9 @@ describe('gradeCase', () => {
     const library: Record<string, ScriptedRecord> = {
       'rec-bad': {
         id: 'rec-bad',
+        productId: 'halden-task-chair',
         propertyId: 'seat-height-adjustable',
+        methodId: 'stated-range',
         documentTitle: 'Halden spec (synthetic fixture)',
         locator: 'p. 4, §2.1',
         quote: 'Seat height adjustable 42–55 cm via gas lift.',

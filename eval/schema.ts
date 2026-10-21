@@ -59,7 +59,11 @@ export type Verification = 'human-verified' | 'interpreted' | 'machine-read';
 
 export interface ScriptedRecord {
   id: string;
+  /** The product this record's value belongs to — the search tool filters on it. */
+  productId: string;
   propertyId: string;
+  /** How the value was measured/stated — the corpus's own method vocabulary. */
+  methodId: string;
   documentTitle: string;
   locator: string;
   quote: string;
