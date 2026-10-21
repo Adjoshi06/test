@@ -122,6 +122,8 @@ export interface CaseResult {
   outcome: EngineOutcome;
   passed: boolean;
   questions: Record<StandingQuestionId, QuestionVerdict>;
+  /** The refusal's reason when the outcome was refuse — recorded so evidence is self-explanatory. */
+  refusalReason?: string;
 }
 
 export interface QuestionSummary {
@@ -281,7 +283,17 @@ export function parseHarnessResults(raw: unknown, source: string): HarnessResult
       questions[question] = { verdict: verdict['verdict'], reason: verdict['reason'] };
     }
 
-    return { caseId, outcome: outcome as EngineOutcome, passed, questions };
+    const refusalReason = entry['refusalReason'];
+    if (refusalReason !== undefined && typeof refusalReason !== 'string') {
+      throw new CaseParseError(`${source}: ${at}.refusalReason must be a string when present`);
+    }
+    return {
+      caseId,
+      outcome: outcome as EngineOutcome,
+      passed,
+      questions,
+      ...(refusalReason === undefined ? {} : { refusalReason }),
+    };
   });
 
   const allPassed = raw['allPassed'];

@@ -4,14 +4,13 @@
 // the same synthetic library the scripted gate grades against.
 
 import { describe, expect, it } from 'vitest';
-import { FakeLibrarySearch } from '@/lib/reasoner/search';
 import type {
   AnswerDraft as ReasonerAnswerDraft,
   ProposedCandidate as ReasonerCandidate,
   ProposedUnknown as ReasonerUnknown,
 } from '@/lib/reasoner/types';
 import { SCRIPTED_LIBRARY } from './fixtures';
-import { providerLibrarySeed, toEvalDraft } from './provider-run';
+import { KeywordRecallSearch, providerLibrarySeed, toEvalDraft } from './provider-run';
 
 const reasonerUnknown = (over: Partial<ReasonerUnknown>): ReasonerUnknown => ({
   propertyId: 'flame-spread',
@@ -110,8 +109,25 @@ describe('providerLibrarySeed', () => {
 
     // The seed must actually answer the reasoner's one tool — a property-term
     // search over the fixture library finds its record.
-    const search = new FakeLibrarySearch(seed);
-    const found = await search.search({ terms: 'gas lift seat height' });
-    expect(found.records.some((record) => record.id === 'rec-halden-seat-height')).toBe(true);
+    const search = new KeywordRecallSearch(seed);
+    const found = await search.search({
+      terms: "what's the fire rating on the Halden task chair?",
+    });
+    expect(found.records.map((record) => record.id)).toContain('rec-halden-seat-height');
+    // Records with no queried term stay out - retrieval invents nothing.
+    expect(found.records.map((record) => record.id)).not.toContain('rec-hull-nrc');
+  });
+
+  it('recalls on any significant term and invents nothing on function words', async () => {
+    const search = new KeywordRecallSearch(providerLibrarySeed());
+    // "show me task chairs" recalls every chair - the reasoner picks the task chairs.
+    const discovery = await search.search({ terms: 'show me task chairs' });
+    expect(discovery.records.map((record) => record.productId)).toContain('halden-task-chair');
+    // Pure function words retrieve nothing.
+    const empty = await search.search({ terms: 'show me the of' });
+    expect(empty.records).toEqual([]);
+    // A literal miss stays a miss - the stand-in does not synthesize hits.
+    const none = await search.search({ terms: 'soundproofing' });
+    expect(none.records).toEqual([]);
   });
 });

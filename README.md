@@ -88,7 +88,12 @@ the real provider (Claude) and be recorded as evidence:
   in the sandbox). Ask in the project thread to have it added; the run never receives a key any
   other way.
 - `npm run eval:provider` runs the harness over the Claude adapter with the synthetic scripted
-  library as its search fixture and writes `.eval/provider-results.json` (`engine: "claude"`).
+  library as its search fixture and writes `.eval/provider-results.json` (`engine: "claude"`,
+  refusals carrying their reason). Retrieval in the run is a keyword-recall stand-in
+  (`eval/provider-run.ts`): function words are dropped and any significant term recalls, so
+  natural-language questions surface the records a real search would. Genuinely semantic lay
+  terms ("soundproof", "lighting for a room") still miss - that limit shows up in the evidence,
+  not papered over.
   This measures reasoning and grading over the synthetic library — not live-corpus retrieval;
   no database-backed search exists yet.
 - Without a key the command exits 2 with its reason. A scripted result is never recorded as a

@@ -245,5 +245,6 @@ export function gradeCase(
     outcome: answer.outcome,
     passed: GRADERS.every((grader) => questions[grader.question].verdict === 'pass'),
     questions,
+    ...(answer.refusalReason === undefined ? {} : { refusalReason: answer.refusalReason }),
   };
 }
